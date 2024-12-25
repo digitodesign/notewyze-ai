@@ -1,9 +1,22 @@
 @echo off
-python -m pip install --upgrade pip
-python -m pip install setuptools wheel
-python -m pip install distutils-precedence
-python -m venv venv
+echo Setting up NoteWyze AI Backend...
+
+REM Create virtual environment if it doesn't exist
+if not exist venv (
+    echo Creating virtual environment...
+    python -m venv venv
+)
+
+REM Activate virtual environment
 call venv\Scripts\activate
-pip install numpy==1.25.2
+
+REM Install/upgrade pip and dependencies
+python -m pip install --upgrade pip
 pip install -r requirements.txt
-python -m uvicorn main:app --reload --port 8000
+
+REM Run migrations
+alembic upgrade head
+
+REM Start the server
+echo Starting FastAPI server...
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
