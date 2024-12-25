@@ -24,6 +24,11 @@ class Settings(BaseSettings):
         "http://localhost:8000",
         "http://localhost:19006",  # Expo web
         "exp://localhost:19000",   # Expo development
+        "exp://192.168.0.*:19000",   # Expo on local network
+        "exp://exp.host/@*/*",       # Expo hosted
+        "*://*.onrender.com",        # Render.com domains
+        "*://*.expo.dev",            # Expo domains
+        "*://*.expo.io"              # Expo domains
     ]
     
     # AI Services
