@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import api_router
 from app.core.config import get_settings
-from app.core.health import check_services
+from app.core.health import check_services, get_health_status
 import logging
 from datetime import datetime
 
@@ -43,7 +43,7 @@ async def health_check():
     """
     Health check endpoint for monitoring.
     """
-    return {"status": "healthy", "timestamp": datetime.utcnow()}
+    return await get_health_status()
 
 @app.get("/services-health")
 async def services_health_check():

@@ -19,40 +19,30 @@ async def check_gemini_connection() -> bool:
         logger.error(f"Gemini connection check failed: {str(e)}")
         return False
 
-async def check_frontend_connection() -> bool:
-    """Check if frontend is accessible."""
+async def check_external_connectivity() -> bool:
+    """Check if external internet connectivity is available."""
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get("http://localhost:3000/health")
+            response = await client.get("https://www.google.com")
             return response.status_code == 200
     except Exception as e:
-        logger.error(f"Frontend connection check failed: {str(e)}")
+        logger.error(f"External connectivity check failed: {str(e)}")
         return False
 
-async def check_services() -> Dict[str, Any]:
-    """Check all service connections."""
-    database_ok = check_db_connection()
-    gemini_ok = await check_gemini_connection()
-    frontend_ok = await check_frontend_connection()
-
-    status = "healthy" if all([database_ok, gemini_ok, frontend_ok]) else "unhealthy"
+async def get_health_status() -> Dict[str, Any]:
+    """Get health status of all services."""
+    db_healthy = await check_db_connection()
+    gemini_healthy = await check_gemini_connection()
+    external_connectivity = await check_external_connectivity()
+    
+    all_healthy = all([db_healthy, external_connectivity])
     
     return {
-        "status": status,
+        "status": "healthy" if all_healthy else "unhealthy",
         "services": {
-            "database": {
-                "status": "up" if database_ok else "down",
-                "type": "neon",
-                "host": "ep-broad-leaf-a5fhnrtn.us-east-2.aws.neon.tech"
-            },
-            "gemini": {
-                "status": "up" if gemini_ok else "down",
-                "type": "api"
-            },
-            "frontend": {
-                "status": "up" if frontend_ok else "down",
-                "url": "http://localhost:3000"
-            }
+            "database": "healthy" if db_healthy else "unhealthy",
+            "gemini": "healthy" if gemini_healthy else "unhealthy",
+            "external_connectivity": "healthy" if external_connectivity else "unhealthy"
         },
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT
