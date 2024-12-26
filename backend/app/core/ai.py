@@ -166,3 +166,57 @@ async def analyze_study_patterns(transcripts: List[str]) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error analyzing study patterns: {str(e)}")
         raise Exception(f"Failed to analyze study patterns: {str(e)}")
+
+async def generate_research_recommendations(transcript: str, max_recommendations: int = 5) -> List[Dict[str, Any]]:
+    """
+    Generate research paper recommendations based on the transcript content.
+    
+    Args:
+        transcript: The transcript text to analyze
+        max_recommendations: Maximum number of recommendations to generate
+        
+    Returns:
+        List[Dict[str, Any]]: List of research paper recommendations
+        
+    Raises:
+        Exception: If there's an error generating recommendations
+    """
+    try:
+        # Create the prompt
+        prompt = f"""Based on this transcript, suggest {max_recommendations} relevant academic papers or research articles 
+        that would be valuable for further study. For each paper, provide:
+        - title: The paper's title
+        - authors: List of authors
+        - year: Publication year
+        - description: Brief description of why this paper is relevant
+        - key_topics: List of key topics covered
+        - relevance_score: A score from 1-10 indicating relevance to the transcript
+        
+        Format each recommendation as a dictionary with these exact keys.
+        
+        Transcript:
+        {transcript}
+        """
+        
+        # Generate recommendations
+        response = model.generate_content(prompt)
+        
+        if not response.text:
+            raise Exception("No recommendations generated")
+            
+        # Parse and validate the response
+        recommendations = eval(response.text)  # Be careful with eval in production!
+        
+        # Validate the structure
+        required_keys = ["title", "authors", "year", "description", "key_topics", "relevance_score"]
+        for rec in recommendations:
+            if not all(key in rec for key in required_keys):
+                raise Exception("Invalid recommendation format")
+            if not isinstance(rec["relevance_score"], (int, float)) or not 1 <= rec["relevance_score"] <= 10:
+                raise Exception("Relevance score must be between 1 and 10")
+                
+        return recommendations[:max_recommendations]
+        
+    except Exception as e:
+        logger.error(f"Error generating research recommendations: {str(e)}")
+        raise Exception(f"Failed to generate research recommendations: {str(e)}")
