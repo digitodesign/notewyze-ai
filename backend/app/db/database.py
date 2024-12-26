@@ -1,14 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.pool import NullPool
-import os
-from dotenv import load_dotenv
+from app.core.config import settings
 
-# Load environment variables
-load_dotenv()
-
-# Get database URL from environment variable and convert to async URL
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Get database URL from settings and convert to async URL
+DATABASE_URL = settings.SQLALCHEMY_DATABASE_URI
 if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
@@ -29,8 +25,8 @@ async_session = sessionmaker(
 # Create declarative base
 Base = declarative_base()
 
-# Dependency to get database session
-async def get_db() -> AsyncSession:
+async def get_db():
+    """Dependency for getting async database session."""
     async with async_session() as session:
         try:
             yield session

@@ -9,10 +9,14 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        "postgresql://neondb_owner:Q7hH4oRvxBFU@ep-broad-leaf-a5fhnrtn.us-east-2.aws.neon.tech/neondb?sslmode=require"
-    )
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        """Get the SQLAlchemy database URI, handling Render's postgres:// format."""
+        if self.DATABASE_URL.startswith("postgres://"):
+            return self.DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        return self.DATABASE_URL
     
     # Security
     SECRET_KEY: str = os.getenv("SECRET_KEY", "notewyze-development-secret-key")

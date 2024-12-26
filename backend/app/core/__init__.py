@@ -1,5 +1,5 @@
 from .audio import process_audio_file, extract_transcript
-from .auth import get_password_hash, verify_password
+from .security import get_password_hash, verify_password
 from .config import settings
 from .deps import get_db, get_current_user
 from .health import get_health_status
