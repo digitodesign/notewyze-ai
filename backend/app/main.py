@@ -4,6 +4,7 @@ from app.api import api_router
 from app.core.config import get_settings
 from app.core.health import check_services
 import logging
+from datetime import datetime
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -39,6 +40,13 @@ def read_root():
 
 @app.get("/health")
 async def health_check():
+    """
+    Health check endpoint for monitoring.
+    """
+    return {"status": "healthy", "timestamp": datetime.utcnow()}
+
+@app.get("/services-health")
+async def services_health_check():
     """
     Check the health of all services
     """

@@ -1,9 +1,12 @@
 services:
   - type: web
     name: notewyze-api
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    runtime: python
+    plan: starter
+    region: ohio
+    buildCommand: bash build.sh
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 4
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
@@ -19,3 +22,13 @@ services:
         generateValue: true
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: 11520
+      - key: BACKEND_CORS_ORIGINS
+        value: https://notewyze-app.vercel.app,https://notewyze-api.onrender.com
+    autoDeploy: true
+
+databases:
+  - name: notewyze-db
+    plan: starter
+    region: ohio
+    databaseName: notewyze
+    user: notewyze
